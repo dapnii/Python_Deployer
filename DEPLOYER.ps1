@@ -1,5 +1,5 @@
 #Converts .txt file contents into array
-$_hostnamesArray = Get-Content -Path 'C:\Automation\DEPLOYER\hostnames.txt'
+$_hostnamesArray = Get-Content -Path '.\hostnames.txt'
 #Array that contains already checked machines
 $_alreadyINSTALLED = @()
 #Start logging all 'Write-Host"
@@ -18,7 +18,7 @@ while ($_isLive) {
             if (($_connectionCHECK = Test-Connection -ComputerName $hostname -count 1 -ErrorAction SilentlyContinue) -and 
             ($_mOSCHECK = Get-WmiObject -ComputerName $hostname Win32_OperatingSystem -ErrorAction SilentlyContinue ) -and
             ($_userCHECK = cmd.exe /c "query user /SERVER:$hostname")) {
-                Write-Host "$hostname is available - $(Get-Date)" -ForegroundColor Green
+                Write-Host "[$(Get-Date)] $hostname is available" -ForegroundColor Green
                 #Checks if app is already installed
                 $_Apps = Invoke-Command -ComputerName $hostname -ScriptBlock {
                     $GetAllApps = Get-ChildItem -Path HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall,`
@@ -30,7 +30,7 @@ while ($_isLive) {
                 foreach ($App in $_Apps) {
                     $_AppNames += $App.DisplayName
                 }
-                #If apps is not already installed, copies file to machine
+                #If app is not already installed, copies file to machine
                 if (-not ($_AppNames -like "*Python*")) {
                     $_PathTest = Test-Path \\$hostname\C$\Support\python-3.12.2-amd64.exe
                     if (-not $_PathTest) {
@@ -38,22 +38,22 @@ while ($_isLive) {
                     }
                     #Checks if file is already transfered and starts installation
                     if ($_Copy -or $_PathTest) {
-                        Write-Host "Python installation file has been transfered to \\$hostname\C:\Support\ successfully - $(Get-Date)" -ForegroundColor Green
-                        Write-Host "Please wait..." -ForegroundColor Green
+                        Write-Host "[$(Get-Date)] Python installation file has been transfered to \\$hostname\C:\Support\ successfully" -ForegroundColor Green
+                        Write-Host "[$(Get-Date)] Please wait..." -ForegroundColor Green
                         Start-Sleep -Seconds 5
                         $_Installation = Invoke-Command -ComputerName $hostname -ScriptBlock {
-                            Write-Host "Python installation has been successfully started - $(Get-Date)" -ForegroundColor Green
+                            Write-Host "[$(Get-Date)] Python installation has been successfully started" -ForegroundColor Green
                             Start-Process -FilePath C:\Support\python-3.12.2-amd64.exe -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1" -noNewWindow -Wait
                         }
-                        Write-Host "Python installation has been successfully completed on $hostname - $(Get-Date)" -ForegroundColor Green
+                        Write-Host "[$(Get-Date)] Python installation has been successfully completed on $hostname" -ForegroundColor Green
                         $_alreadyINSTALLED += $hostname
                     }
                 } else {
-                    Write-Host "Python is already installed on $hostname - $(Get-Date)" -ForegroundColor Green
+                    Write-Host "[$(Get-Date)] Python is already installed on $hostname" -ForegroundColor Green
                     $_alreadyINSTALLED += $hostname
                 }
             } else {
-                Write-Host "$hostname couldn't be reached - $(Get-Date)" -ForegroundColor Red
+                Write-Host "[$(Get-Date)] $hostname couldn't be reached" -ForegroundColor Red
                 Continue
             }
         }
