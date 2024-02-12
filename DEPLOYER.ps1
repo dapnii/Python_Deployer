@@ -31,7 +31,7 @@ while ($_isLive) {
                     $_AppNames += $App.DisplayName
                 }
                 #If app is not already installed, copies file to machine
-                if (-not ($_AppNames -like "*Python*")) {
+                if (-not ($_AppNames -like "*Python 3.12.2*")) {
                     $_PathTest = Test-Path \\$hostname\C$\Support\python-3.12.2-amd64.exe
                     if (-not $_PathTest) {
                         $_Copy = xcopy .\python-3.12.2-amd64.exe \\$hostname\C$\Support
@@ -49,7 +49,7 @@ while ($_isLive) {
                         $_alreadyINSTALLED += $hostname
                     }
                 } else {
-                    Write-Host "[$(Get-Date)] Python is already installed on $hostname" -ForegroundColor Green
+                    Write-Host "[$(Get-Date)] Python 3.12.2 is already installed on $hostname" -ForegroundColor Green
                     $_alreadyINSTALLED += $hostname
                 }
             } else {
