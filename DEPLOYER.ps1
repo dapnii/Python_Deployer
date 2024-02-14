@@ -3,10 +3,22 @@ $_hostnamesArray = Get-Content -Path '.\hostnames.txt'
 #Array that contains already checked machines
 $_alreadyINSTALLED = @()
 #Start logging all 'Write-Host"
+Start-Transcript -Path ".\logs\Transcript - $((Get-Date -f "yyyy-MM-dd HH;mm;ss").ToString()).txt"
+#Checks if there is "logs" folder in the folder where script is located and if not creates it.
 if (-not (Test-Path .\logs)) {
     New-Item -ItemType Directory -Path .\logs -Force | Out-Null
 }
-Start-Transcript -Path ".\logs\Transcript - $((Get-Date -f "yyyy-MM-dd HH;mm;ss").ToString()).txt"
+#Checks if there is Python .exe installer in the folder where script is located
+if (-not (Test-Path .\python-3.12.2-amd64.exe )) {
+    $_URL = "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe"
+    $_Output = ".\python-3.12.2-amd64.exe"
+    $_StartTime = Get-Date
+    $_DownloadObject = New-Object System.Net.WebClient
+    Write-Host "[$(Get-Date)] Python installer not detected" -ForegroundColor Magenta
+    Write-Host "[$(Get-Date)] Downloading Python installer" -ForegroundColor Magenta
+    $_DownloadObject.DownloadFile($_URL, $_Output)
+    Write-Host "[$(Get-Date)] Time taken: $((Get-Date).Subtract($_StartTime).Seconds) second(s)" -ForegroundColor Magenta
+}
 
 #Main loop
 $_isLive = $true
@@ -32,6 +44,11 @@ while ($_isLive) {
                 }
                 #If app is not already installed, copies file to machine
                 if (-not ($_AppNames -like "*Python 3.12.2*")) {
+                    if (-not (Test-Path \\$hostname\C$\Support)) {
+                        Invoke-Command -ComputerName $hostname -ScriptBlock {
+                            New-Item -ItemType Directory -Path "C:\Support" -Force | Out-Null
+                        }
+                    }
                     $_PathTest = Test-Path \\$hostname\C$\Support\python-3.12.2-amd64.exe
                     if (-not $_PathTest) {
                         $_Copy = xcopy .\python-3.12.2-amd64.exe \\$hostname\C$\Support
