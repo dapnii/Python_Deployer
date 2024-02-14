@@ -10,14 +10,28 @@ if (-not (Test-Path .\logs)) {
 }
 #Checks if there is Python .exe installer in the folder where script is located
 if (-not (Test-Path .\python-3.12.2-amd64.exe )) {
+    Write-Host "[$(Get-Date)] Python installer not detected" -ForegroundColor Magenta
+    #Stores the current security protocol setting
+    $_PreviousSecurityProtocolType = [Net.ServicePointManager]::SecurityProtocol
+    if (-not ($_PreviousSecurityProtocolType -eq "Tls12")) {
+        #Sets the security protocol to TLS 1.2
+        Write-Host "[$(Get-Date)] Changing security protocol to TLS 1.2" -ForegroundColor Magenta
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    } 
     $_URL = "https://www.python.org/ftp/python/3.12.2/python-3.12.2-amd64.exe"
     $_Output = ".\python-3.12.2-amd64.exe"
     $_StartTime = Get-Date
-    $_DownloadObject = New-Object System.Net.WebClient
-    Write-Host "[$(Get-Date)] Python installer not detected" -ForegroundColor Magenta
     Write-Host "[$(Get-Date)] Downloading Python installer" -ForegroundColor Magenta
+    $_DownloadObject = New-Object System.Net.WebClient
     $_DownloadObject.DownloadFile($_URL, $_Output)
     Write-Host "[$(Get-Date)] Time taken: $((Get-Date).Subtract($_StartTime).Seconds) second(s)" -ForegroundColor Magenta
+    # Restore the previous security protocol setting if needed
+    if ([Net.ServicePointManager]::SecurityProtocol -ne $_PreviousSecurityProtocolType) {
+        Write-Host "[$(Get-Date)] Changing security protocol back to $_PreviousSecurityProtocolType" -ForegroundColor Magenta
+        [Net.ServicePointManager]::SecurityProtocol = $_PreviousSecurityProtocolType
+    }
+} else {
+    Write-Host "[$(Get-Date)] Python installer detected" -ForegroundColor Magenta
 }
 
 #Main loop
