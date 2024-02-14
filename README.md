@@ -3,4 +3,5 @@ Tool used to remotely deploy Python to multiple machines.
 
 
 
-![image](https://github.com/dapnii/Python_Deployer/assets/116521500/e517260a-5933-4f64-8b3c-2a47b0e119db)
+![image](https://github.com/dapnii/Python_Deployer/assets/116521500/91864652-ab0a-456e-bb6f-2ea256fc509f)
+
